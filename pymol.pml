@@ -39,3 +39,9 @@ png ~/vegf2_vegf2mutant.png
 #util.mroll(1,360,1)
 #set ray_trace_frames, 0 
 #movie.produce /home/floris/vegf2_vegf2mutant_animation.mp4, quality=90
+
+frames = cmd.count_states("all")
+cmd.mset(frames)
+cmd.movie.roll(1, frames, axis='y')
+cmd.set("ray_trace_frames", 0)
+cmd.movie.produce("~/vegf2_vegf2mutant_animation.mp4", quality=90)
