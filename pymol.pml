@@ -1,10 +1,10 @@
 
 
 load /home/floris/Documenten/Hanze_Bioinformatica/Jaar_3/Kwartaal_10/Alphafold/mutant_gromacs/vegf2mutant.pdb, vegf2mutant
-load_traj /home/floris/Documenten/Hanze_Bioinformatica/Jaar_3/Kwartaal_10/Alphafold/mutant_gromacs/vegf2mutant-MD.xtc, vegf2mutant, 1,
+load_traj /home/floris/Documenten/Hanze_Bioinformatica/Jaar_3/Kwartaal_10/Alphafold/mutant_gromacs/vegf2mutant.xtc, vegf2mutant, 1,
 
 load /home/floris/Documenten/Hanze_Bioinformatica/Jaar_3/Kwartaal_10/Alphafold/canonical_gromacs/vegf2.pdb, vegf2
-load_traj /home/floris/Documenten/Hanze_Bioinformatica/Jaar_3/Kwartaal_10/Alphafold/canonical_gromacs/vegf2-MD.xtc, vegf2, 1,
+load_traj /home/floris/Documenten/Hanze_Bioinformatica/Jaar_3/Kwartaal_10/Alphafold/canonical_gromacs/vegf2.xtc, vegf2, 1,
 
 remove resn sol+na+cl
 
@@ -15,6 +15,9 @@ align vegf2mutant, vegf2
 
 color green, vegf2
 color magenta, vegf2mutant 
+
+# To-do: mutatie kleuren
+
 
 
 set_view (\
@@ -32,7 +35,7 @@ png ~/vegf2_vegf2mutant.png
 
 # Animatie:
 
-mset 1 x360  
-util.mroll(1,360,1)
-set ray_trace_frames, 0 
-movie.produce /home/floris/vegf2_vegf2mutant_animation.mp4, quality=90
+#mset 1 x360  
+#util.mroll(1,360,1)
+#set ray_trace_frames, 0 
+#movie.produce /home/floris/vegf2_vegf2mutant_animation.mp4, quality=90
