@@ -1,4 +1,8 @@
-
+cmd.set("antialias", 2) 
+cmd.set("ray_shadows", 1)
+cmd.set("light_count", 2)
+cmd.set("specular", 0.5)
+cmd.set("ray_trace_frames", 1)
 
 load /home/floris/Documenten/Hanze_Bioinformatica/Jaar_3/Kwartaal_10/Alphafold/mutant_gromacs/vegf2mutant.pdb, vegf2mutant
 load_traj /home/floris/Documenten/Hanze_Bioinformatica/Jaar_3/Kwartaal_10/Alphafold/mutant_gromacs/vegf2mutant.xtc, vegf2mutant, 1,
@@ -35,13 +39,77 @@ png ~/vegf2_vegf2mutant.png
 
 # Animatie:
 
-#mset 1 x360  
-#util.mroll(1,360,1)
-#set ray_trace_frames, 0 
-#movie.produce /home/floris/vegf2_vegf2mutant_animation.mp4, quality=90
+#frames = cmd.count_states("all")
+#cmd.mset(frames)
+#cmd.movie.roll(1, frames, axis='y')
+#cmd.set("ray_trace_frames", 0)
+#cmd.movie.produce("~/vegf2_vegf2mutant_animation.mp4", quality=90)
 
-frames = cmd.count_states("all")
-cmd.mset(frames)
-cmd.movie.roll(1, frames, axis='y')
-cmd.set("ray_trace_frames", 0)
-cmd.movie.produce("~/vegf2_vegf2mutant_animation.mp4", quality=90)
+
+# PCA: 
+
+remove hydro
+ 
+import numpy as np
+
+mdl = cmd.get_model("vegf2mutant")
+
+X = np.array([ cmd.get_model("vegf2mutant", state=idx+1).get_coord_list() for idx in range (cmd.count_states("vegf2mutant"))])
+
+ 
+mean = X.mean(axis=0)
+ 
+X = (X-mean).reshape((len(X),-1))
+ 
+vals, vecs = np.linalg.eigh(X@(X.T/len(X)))
+ 
+loadings = X.T @ vecs[:,::-1]
+ 
+loadings /= (loadings**2).sum(axis=0, keepdims=True)**0.5
+ 
+scores = X@loadings
+ 
+vals = vals[::-1]
+ 
+L1 = loadings[:,0].reshape((-1,3))
+ 
+S1 = scores[:,0]
+ 
+xmin = S1.min() * L1 + mean
+ 
+xmax = S1.max() * L1 + mean
+ 
+cmd.load_cgo([u for (xs, ys, zs), (xe, ye, ze) in zip(xmin, xmax) for u in [9.0, xs, ys, zs, xe, ye, ze, 0.1, 0, 0, 1, 1, 0, 0]], "pc1")
+ 
+M = cmd.get_model("vegf2mutant")
+ 
+for idx, mx in enumerate(mean): M.atom[idx].coord = list(mx)
+ 
+cmd.load_model(M, "mean")
+ 
+sho cart
+
+color palecyan, mean
+
+# Animatie PCA:
+
+cmd.disable("pc1") 
+
+cmd.hide("everything", "vegf2")
+cmd.hide("everything", "vegf2mutant")
+cmd.show("cartoon", "mean")
+cmd.show("cgo", "pc1")
+
+cmd.set("cgo_line_width", 3)
+cmd.center("mean")
+cmd.zoom("mean")
+
+cmd.mset("1 x360")
+
+cmd.movie.roll(1, 360, 1, axis='y')
+
+# Eerste 20 frames enkel mean structuur te zien:
+cmd.mdo(1, "disable pc1")
+cmd.mdo(30, "enable pc1")
+
+cmd.movie.produce("/home/floris/vegf2_vegf2mutant_animation_PCA.mp4", mode="ray", quality=100)
